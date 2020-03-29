@@ -1,12 +1,9 @@
 #ifndef __LS_STL_INTERNAL_ALLOC_H__
 #define __LS_STL_INTERNAL_ALLOC_H__
 
-#include<memory>
-
 template<class _Tp>
 class allocator
 {
-	using alloc = _Alloc;
 public:
 	using size_type = size_t;
 	using difference_type = ptrdiff_t;
@@ -33,11 +30,15 @@ public:
 
 	_Tp* allocate(size_type n)
 	{
-		return n != 0 ? static_cast<_Tp*>(_Alloc::allocate(n * sizeof(_Tp))) : nullptr;
+		return n > 0 ? ::operator new(n) : nullptr;
 	}
 	void deallocate(pointer p, size_type n)
 	{
-		_Alloc::deallocate(p, n * sizeof(_Tp));
+		::operator delete p;
+	}
+	void deallocate(pointer p)
+	{
+		::operator delete p;
 	}
 	size_type max_size() const noexcept
 	{
