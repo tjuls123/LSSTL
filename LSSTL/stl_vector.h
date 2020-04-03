@@ -3,8 +3,6 @@
 
 #include"stl_config.h"
 
-#define __STL_DEFAULT_ALLOCATOR		
-
 __STL_BEGIN_NAMESPACE
 
 template<class _Tp, class _Allocator, bool _IsStatic>
@@ -66,7 +64,7 @@ public:
 
 
 
-template<class _Tp, class _Alloc = __STL_DEFAULT_ALLOCATOR(_Tp)>
+template<class _Tp, class _Alloc = allocator<_Tp>>
 class vector : protected _Vector_base
 {
 private:
@@ -151,12 +149,15 @@ public:
 	reference front() { return *begin(); }
 	const_reference front() const { return *cbegin(); }
 	reference back() { return *(end() - 1); }
-	cosnt_reference back const() { return *(cend() - 1); }
+	const_reference back const() { return *(cend() - 1); }
 
 	void push_back(const _Tp& value);
 	void push_back();
 
-	void swap(vector<_Tp, _Alloc>& other);
+	void swap(vector<_Tp, _Alloc>& other)
+	{
+
+	}
 	iterator insert(iterator position, const _Tp& value);
 	iterator insert(iterator position);
 
@@ -169,7 +170,7 @@ public:
 	iterator erase(iterator position);
 	iterator erase(iterator first, iterator end);
 	void resize(size_type n, const _Tp& value);
-	void resize(size_type, n);
+	void resize(size_type n);
 	void clear() { erase(begin(), end()); }
 
 protected:
@@ -177,6 +178,59 @@ protected:
 	void _M_fill_assign(size_type n, const _Tp& val);
 };
 
+template<class _Tp, class _Alloc /*= __STL_DEFAULT_ALLOCATOR(_Tp)*/>
+void vector<_Tp, _Alloc>::resize(size_type n)
+{
+
+}
+
+template<class _Tp, class _Alloc /*= __STL_DEFAULT_ALLOCATOR(_Tp)*/>
+void vector<_Tp, _Alloc>::resize(size_type n, const _Tp& value)
+{
+
+}
+
+template<class _Tp, class _Alloc /*= __STL_DEFAULT_ALLOCATOR(_Tp)*/>
+typename vector<_Tp, _Alloc>::iterator vector<_Tp, _Alloc>::erase(iterator first, iterator end)
+{
+	return first;
+}
+
+template<class _Tp, class _Alloc /*= __STL_DEFAULT_ALLOCATOR(_Tp)*/>
+typename vector<_Tp, _Alloc>::iterator vector<_Tp, _Alloc>::erase(iterator position)
+{
+	return first;
+}
+
+template<class _Tp, class _Alloc /*= __STL_DEFAULT_ALLOCATOR(_Tp)*/>
+void vector<_Tp, _Alloc>::pop_back()
+{
+
+}
+
+template<class _Tp, class _Alloc /*= __STL_DEFAULT_ALLOCATOR(_Tp)*/>
+void vector<_Tp, _Alloc>::insert(iterator position, size_type n, const _Tp& value)
+{
+
+}
+
+template<class _Tp, class _Alloc /*= __STL_DEFAULT_ALLOCATOR(_Tp)*/>
+typename vector<_Tp, _Alloc>::iterator vector<_Tp, _Alloc>::insert(iterator position)
+{
+	return position;
+}
+
+template<class _Tp, class _Alloc /*= __STL_DEFAULT_ALLOCATOR(_Tp)*/>
+typename vector<_Tp, _Alloc>::iterator vector<_Tp, _Alloc>::insert(iterator position, const _Tp& value)
+{
+	return position;
+}
+
+template<class _Tp, class _Alloc /*= __STL_DEFAULT_ALLOCATOR(_Tp)*/>
+void vector<_Tp, _Alloc>::_M_fill_assign(size_type n, const _Tp& val)
+{
+
+}
 
 template<class _Tp, class _Alloc>
 inline bool operator==(vector<_Tp, _Alloc> vec1, vector<_Tp, _Alloc> vec2)

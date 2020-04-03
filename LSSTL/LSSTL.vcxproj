@@ -129,6 +129,7 @@
     <ClInclude Include="stl_iterator_base.h" />
     <ClInclude Include="stl_uninitialized.h" />
     <ClInclude Include="stl_vector.h" />
+    <ClInclude Include="type_traits.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

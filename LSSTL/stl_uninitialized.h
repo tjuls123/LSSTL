@@ -2,17 +2,18 @@
 #define __LS_STL_INTERNAL_UNINITIALIZED_H__
 #include "stl_config.h"
 #include <vcruntime_string.h>
+#include "type_traits.h"
 
 __STL_BEGIN_NAMESPACE
 
 template<class InputIterator, class ForwardIterator>
-inline ForwardIterator __uninitiallized_copy_aux(InputIterator first, InputIterator last, ForwardIterator result, __true_type)
+inline ForwardIterator __uninitiallized_copy_aux(InputIterator first, InputIterator last, ForwardIterator result, true_type)
 {
 	return copy(first, last, result);
 }
 
 template<class InputIterator, class ForwardIterator>
-ForwardIterator __uninitialized_copy_aux(InputIterator first, InputIterator last, ForwardIterator result, __false_type)
+ForwardIterator __uninitialized_copy_aux(InputIterator first, InputIterator last, ForwardIterator result, false_type)
 {
 	ForwardIterator cur = result;
 	for (; first != last; ++first, ++result)
@@ -26,7 +27,7 @@ ForwardIterator __uninitialized_copy_aux(InputIterator first, InputIterator last
 template<class InputIterator, class ForwardIterator, class T>
 inline ForwardIterator __uninitialized_copy(InputIterator first, InputIterator last, ForwardIterator result, T*)
 {
-	using Is_POD = typename __type_traits<T>::is_POD_type;
+	using Is_POD = typename type_traits<T>::is_POD_type;
 	return __uninitialized_copy_aux(first, last, result, Is_POD());
 }
 
@@ -58,13 +59,13 @@ inline char* uninitialized_copy(const char* first, const char* last, char* resul
 /* uninitialized_fill                                                                     */
 /************************************************************************/
 template<class ForwardIterator, class T>
-inline void __uninitialized_fill_aux(ForwardIterator first, ForwardIterator last, const T& value, __true_type)
+inline void __uninitialized_fill_aux(ForwardIterator first, ForwardIterator last, const T& value, true_type)
 {
 	fill(first, last, value);
 }
 
 template<class ForwardIterator, class T>
-inline void __uninitialized_fill_aux(ForwardIterator first, ForwardIterator last, const T& value, __false_type)
+inline void __uninitialized_fill_aux(ForwardIterator first, ForwardIterator last, const T& value, false_type)
 {
 	ForwardIterator cur = first;
 	for (; first != last; ++first, ++cur)
@@ -77,7 +78,7 @@ inline void __uninitialized_fill_aux(ForwardIterator first, ForwardIterator last
 template<class ForwardIterator, class T, class U>
 inline void __uninitialized_fill(ForwardIterator first, ForwardIterator last, const T& value)
 {
-	using Is_POD = typename __type_traits<U>::is_POD_type;
+	using Is_POD = typename type_traits<U>::is_POD_type;
 	__uninitialized_fill_aux(first, last, Is_POD());
 }
 

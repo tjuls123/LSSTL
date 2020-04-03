@@ -1,6 +1,8 @@
 #ifndef __LS_STL_INTERNAL_ALLOC_H__
 #define __LS_STL_INTERNAL_ALLOC_H__
 
+__STL_BEGIN_NAMESPACE
+
 template<class _Tp>
 class allocator
 {
@@ -30,15 +32,15 @@ public:
 
 	_Tp* allocate(size_type n)
 	{
-		return n > 0 ? ::operator new(n) : nullptr;
+		return n > 0 ? static_cast<_Tp*>(::operator new(n * sizeof(_Tp))) : nullptr;
 	}
 	void deallocate(pointer p, size_type n)
 	{
-		::operator delete p;
+		deallocate(p);
 	}
 	void deallocate(pointer p)
 	{
-		::operator delete p;
+		::operator delete (p);
 	}
 	size_type max_size() const noexcept
 	{
@@ -53,5 +55,36 @@ public:
 		p ->~_Tp();  // call destructor
 	}
 };
+
+
+
+template<>
+class allocator<void>
+{
+public:
+	using value_type = void;
+	using pointer = void *;
+	using const_pointer = const void*;
+
+	template<class U>
+	struct rebind
+	{
+		using other = allocator<U>;
+	};
+};
+
+
+template<class T, class U>
+inline bool operator == (const allocator<T>& alloc, const allocator<U>& other_alloc)
+{
+	return true;
+}
+
+template<class T, class U>
+inline bool operator != (const allocator<T>& alloc, const allocator<U>& other_alloc)
+{
+	return false;
+}
+__STL_END_NAMESPACE
 
 #endif // !__LS_STL_INTERNAL_ALLOC_H__
