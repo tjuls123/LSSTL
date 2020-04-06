@@ -3,6 +3,18 @@
 
 __STL_BEGIN_NAMESPACE
 
+template<class _Alloc>
+struct allocator_traits
+{
+	using allocator_type = _Alloc;
+	using value_type = typename allocator_type::value_type;
+	using pointer = typename allocator_type::pointer;
+	using const_pointer = typename allocator_type::const_pointer;
+	//using void_pointer = ;
+	using difference_type = typename allocator_type::difference_type;
+	using size_type = typename allocator_type::size_type;
+
+};
 template<class _Tp>
 class allocator
 {
@@ -85,6 +97,7 @@ inline bool operator != (const allocator<T>& alloc, const allocator<U>& other_al
 {
 	return false;
 }
+
 __STL_END_NAMESPACE
 
 #endif // !__LS_STL_INTERNAL_ALLOC_H__

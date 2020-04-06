@@ -2,6 +2,7 @@
 #define __LS_STL_INTERNAL_CONSTRUCT_H__
 #include "stl_config.h"
 #include "type_traits.h"
+#include "stl_iterator_base.h"
 
 __STL_BEGIN_NAMESPACE
 
@@ -42,7 +43,8 @@ void __destroy_aux(ForwardIterator first, ForwardIterator last, true_type)
 template<class ForwardIterator, class Tp>
 inline void __destroy(ForwardIterator first, ForwardIterator last, Tp*)
 {
-	__destroy_aux(first, last, is_trivially_constructible());
+	using has_trivial_destructor = typename type_traits<Tp>::has_trivial_destructor;
+	__destroy_aux(first, last, has_trivial_destructor());
 }
 template<class ForwardIterator>
 inline void _Destroy(ForwardIterator first, ForwardIterator last)

@@ -3,19 +3,47 @@
 #include <iostream>
 #include "stl_alloc.h"
 #include <vector>
+#include"stl_vector.h"
+#include <algorithm>
+#include "stl_list.h"
+#include"stl_heap.h"
+#include "stl_initializer_list.h"
 using namespace std;
 
+
+template<class InputIterator>
+void print_container(InputIterator first, InputIterator last)
+{
+	for (; first != last; ++first)
+	{
+		cout << *first << ' ';
+	}
+	cout << endl;
+}
+
+
+class A
+{
+public:
+	virtual void func() {
+		cout << "A:func" << endl;
+	}
+};
+
+class B : public A
+{
+private:
+	virtual void func()
+	{
+		cout << "B:func" << endl;
+	}
+};
 int main()
 {
-	cout << lsstd::bool_constant<true>::value << endl;
+	A *pa = new B();
+	pa->func();
 
-
-	cout << sizeof(const int) << endl; // 4
-	cout << sizeof(const int*) << endl; // 8
-	cout << sizeof(int[23]) << endl;  // 92
-	cout << sizeof(const volatile int) << endl;  // 4
-	int *p = nullptr;
-	cout << sizeof(p) << endl;
-	cout << sizeof(lsstd::bool_constant<true>::type) << endl;
+	int a = reinterpret_cast<int>(pa);
+	cout << a << endl;
 	system("pause");
 }

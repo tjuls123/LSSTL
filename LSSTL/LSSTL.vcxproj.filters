@@ -41,5 +41,29 @@
     <ClInclude Include="type_traits.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="stl_algobase.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stl_algo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stl_list.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stl_heap.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stl_function.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stl_iterator.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stl_tuple.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stl_initializer_list.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

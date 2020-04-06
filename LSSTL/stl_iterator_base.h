@@ -170,7 +170,7 @@ template<class InputIterator>
 typename iterator_traits<InputIterator>::difference_type
 distance(InputIterator first, InputIterator last)
 {
-	return __distance(first, last, iterator_cagegory(first))£»
+	return __distance(first, last, iterator_cagegory(first));
 }
 
 template<class InputIterator, class Distance>

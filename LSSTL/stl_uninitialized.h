@@ -7,7 +7,7 @@
 __STL_BEGIN_NAMESPACE
 
 template<class InputIterator, class ForwardIterator>
-inline ForwardIterator __uninitiallized_copy_aux(InputIterator first, InputIterator last, ForwardIterator result, true_type)
+inline ForwardIterator __uninitialized_copy_aux(InputIterator first, InputIterator last, ForwardIterator result, true_type)
 {
 	return copy(first, last, result);
 }
@@ -34,11 +34,12 @@ inline ForwardIterator __uninitialized_copy(InputIterator first, InputIterator l
 /************************************************************************/
 /*                           std function                                          */
 /************************************************************************/
-template<class InputIterator, class ForwardIterator, class T>
+template<class InputIterator, class ForwardIterator>
 inline ForwardIterator uninitialized_copy(InputIterator first, InputIterator last, ForwardIterator result)
 {
-	return __uninitialized_copy_aux(first, last, result, __VALUE_TYPE(result));
+	return __uninitialized_copy(first, last, result, __VALUE_TYPE(result));
 }
+
 
 inline char* uninitialized_copy(const char* first, const char* last, char* result)
 {
