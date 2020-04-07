@@ -28,6 +28,19 @@ public:
 	virtual void func() {
 		cout << "A:func" << endl;
 	}
+
+	void ff(int a) {
+		cout << "ff" << endl;
+	}
+
+	void ff(int a) const  {
+		cout << "const ff" << endl;
+	}
+
+	void ff(const int a)
+	{
+
+	}
 };
 
 class B : public A
@@ -40,8 +53,8 @@ private:
 };
 int main()
 {
-	A *pa = new B();
-	pa->func();
+	A *pa = new A();
+	pa->ff(2);
 
 	int a = reinterpret_cast<int>(pa);
 	cout << a << endl;
