@@ -2,6 +2,7 @@
 #include "stl_config.h"
 #include "stl_alloc.h"
 #include <xutility>
+#include "stl_pair.h"
 
 
 __STL_BEGIN_NAMESPACE
@@ -273,5 +274,53 @@ public:
 		return const_iterator(nullptr, this);
 	}
 
+public:
+	size_type bucket_count() const { return buckets.size(); }
+
+	size_type max_bucket_count() const { return __stl_prime_list[__stl_num_primes - 1]; }
+
+	//获取bucket的链表元素数量
+	size_type elements_in_bucket(size_type bucket_index)
+	{
+		size_type n = 0;
+		for (_Node * cur = buckets[bucket_index]; cur != nullptr; cur = cur->next)
+		{
+			++n;
+		}
+		return n;
+	}
+
+	pair<iterator, bool> insert_unique(const value_type& obj)
+	{
+		resize(num_element + 1);
+		return insert_unique_noresize(obj);
+	}
+
+	iterator insert_equal(const value_type& obj)
+	{
+		resize(num_element + 1);
+		return insert_unique_noresize(obj);
+	}
+
+	pair<iterator, bool> insert_unique_noresize(const value_type& obj)
+	{
+
+	}
+	iterator insert_equal_noresize(const value_type& obj);
 };
+
+
+template<class Value, class Key, class HashFun, class ExtractKey, class EqualKey, class Alloc>
+pair<typename hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>::iterator, bool>
+hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>::insert_unique_noresize(const value_type& obj)
+{
+
+}
+
+template<class Value, class Key, class HashFun, class ExtractKey, class EqualKey, class Alloc>
+typename hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>::iterator
+hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>::::insert_equal_noresize(const value_type& obj)
+{
+
+}
 __STL_END_NAMESPACE

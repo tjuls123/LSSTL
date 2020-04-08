@@ -68,5 +68,8 @@
     <ClInclude Include="stl_hashtable.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="stl_pair.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
