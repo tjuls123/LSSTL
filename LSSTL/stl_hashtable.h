@@ -304,23 +304,204 @@ public:
 
 	pair<iterator, bool> insert_unique_noresize(const value_type& obj)
 	{
+		// 计算bucket 索引
+		const size_type n = _M_bkt_num(obj);
+
+		_Node* first = buckets[n];
+		for (_Node* cur = first; cur; cur = cur->next)
+		{
+			if (equals(get_key(cur->val), get_key(obj)))
+			{
+				return pair<iterator, bool>(iterator(cur, this), false);
+			}
+		}
+	}
+	iterator insert_equal_noresize(const value_type& obj)
+	{
 
 	}
-	iterator insert_equal_noresize(const value_type& obj);
+
+	reference find_or_insert(const value_type& obj)
+	{
+
+	}
+
+	iterator find(const key_type& key)
+	{
+		size_type n = _M_bkt_num_key(key);
+		_Node* first = nullptr;
+		for(first = buckets[n]; first && (!equals(get_key(first->val), key)); first = first->next)
+		{ }
+		return iterator(first, this);
+	}
+
+private:
+	size_type _M_next_size(size_type n) const
+	{
+		return __stl_next_prime(n);
+	}
+
+	void _M_initialize_buckets(size_type n)
+	{
+		const size_type n_buckets = _M_next_size(n);
+		buckets.reserve(n_buckets);
+		buckets.insert(buckets.end(), n_buckets, nullptr);
+		num_element = 0;
+	}
+
+	// 计算key的哈希值
+	size_type _M_bkt_num_key(const key_type& key) const
+	{
+		return _M_bkt_num_key(key, buckets.size());
+	}
+
+	// 计算value对应key的哈希值
+	size_type _M_bkt_num(const value_type& obj) const
+	{
+		return _M_bkt_num_key(get_key(obj), buckets.size());
+	}
+
+	// 计算key的哈希值
+	size_type _M_bkt_num_key(const key_type& key, size_type n) const
+	{
+		return hash(key) % n;
+	}
+
+	size_type _M_bkt_num(const value_type& obj, size_type n) const
+	{
+		return _M_bkt_num_key(get_key(obj), n);
+	}
+
+	_Node* _M_new_node(const value_type& obj, size_type n) const
+	{
+		_Node* node = get_node();
+		node->next = nullptr;
+		construct(&node->val, obj);
+		return node;
+	}
+
+	void _M_delete_node(_Node* node)
+	{
+		destroy(&node->val);
+		put_node(node);
+	}
+
+	void _M_erase_bucket(const size_type n, _Node* first, _Node* last);
+	void _M_erase_bucket(const size_type n, _Node* last);
+
+	void _M_copy_from(const hashtable& other);
 };
 
+//////////////////////////////////////////////////////////////////////////
+// iterator
+template<class Value, class Key, class HashFun, class ExtractKey, class EqualKey, class Alloc>
+hashtable_iterator< Value, Key, HashFun, ExtractKey, EqualKey, Alloc>& 
+hashtable_iterator<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>::operator++()
+{
+	const _Node* old = cur_node;
+	cur_node = cur_node->next;
+	if (cur_node == nullptr)
+	{
+		// 需要获得下一个链表的头结点
+		size_type bucket_hash = ht->_M_bkt_num(old->val);
+		while (cur_node == nullptr && ++bucket_hash < ht->buckets.size())
+		{
+			cur_node = ht->buckets[bucket_hash];
+		}
+	}
+	return *this;
+}
+
 
 template<class Value, class Key, class HashFun, class ExtractKey, class EqualKey, class Alloc>
-pair<typename hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>::iterator, bool>
-hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>::insert_unique_noresize(const value_type& obj)
+hashtable_iterator< Value, Key, HashFun, ExtractKey, EqualKey, Alloc>
+hashtable_iterator<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>::operator++(int)
+{
+	iterator tmp = *this;
+	++*this;
+	return tmp;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// const_iterator
+template<class Value, class Key, class HashFun, class ExtractKey, class EqualKey, class Alloc>
+hashtable_conster_iterator< Value, Key, HashFun, ExtractKey, EqualKey, Alloc>&
+hashtable_conster_iterator<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>::operator++()
+{
+	const _Node* old = cur_node;
+	cur_node = cur_node->next;
+	if (cur_node == nullptr)
+	{
+		// 需要获得下一个链表的头结点
+		size_type bucket_hash = ht->_M_bkt_num(old->val);
+		while (cur_node == nullptr && ++bucket_hash < ht->buckets.size())
+		{
+			cur_node = ht->buckets[bucket_hash];
+		}
+	}
+	return *this;
+}
+
+
+template<class Value, class Key, class HashFun, class ExtractKey, class EqualKey, class Alloc>
+hashtable_conster_iterator< Value, Key, HashFun, ExtractKey, EqualKey, Alloc>
+hashtable_conster_iterator<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>::operator++(int)
+{
+	hashtable_conster_iterator tmp = *this;
+	++*this;
+	return tmp;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// hashtable operator ==
+template<class Value, class Key, class HashFun, class ExtractKey, class EqualKey, class Alloc>
+bool operator==(
+	const hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>&ht1,
+	const hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>& ht2)
+{
+	using _Node = hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>::_Node;
+	if (ht1.buckets.size() != ht2.buckets.size())
+	{
+		return false;
+	}
+	for (int n = 0; n < ht1.buckets.size(); ++n)
+	{
+		_Node* cur1 = ht1.buckets[n];
+		_Node* cur2 = ht2.buckets[n];
+		for (; cur1 && cur2 && cur1->val == cur2->val; cur1 = cur1->next, cur2 = cur2->next)
+		{
+		}
+		if (cur1 || cur2)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+template<class Value, class Key, class HashFun, class ExtractKey, class EqualKey, class Alloc>
+bool operator!=(
+	const hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>&ht1,
+	const hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>& ht2)
+{
+	return !(ht1 == ht2);
+}
+
+template<class Value, class Key, class HashFun, class ExtractKey, class EqualKey, class Alloc>
+inline void swap(hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>&ht1,
+	hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>& ht2)
+{
+	ht1.swap(ht2);
+}
+
+//////////////////////////////////////////////////////////////////////////
+// hashtable
+template<class Value, class Key, class HashFun, class ExtractKey, class EqualKey, class Alloc>
+void hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>::_M_copy_from(const hashtable& other)
 {
 
 }
 
-template<class Value, class Key, class HashFun, class ExtractKey, class EqualKey, class Alloc>
-typename hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>::iterator
-hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>::::insert_equal_noresize(const value_type& obj)
-{
 
-}
 __STL_END_NAMESPACE
