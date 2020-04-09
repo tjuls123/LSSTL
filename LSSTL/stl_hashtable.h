@@ -3,6 +3,7 @@
 #include "stl_alloc.h"
 #include <xutility>
 #include "stl_pair.h"
+#include "stl_algo.h"
 
 
 __STL_BEGIN_NAMESPACE
@@ -201,6 +202,7 @@ public:
 		const allocator_type& a = allocator_type())
 		: node_allocator(a), hash(in_hf), equals(in_equal_key), get_key(in_extract_key), buckets(a), num_element(0)
 	{
+		_M_initialize_buckets(size);
 	}
 
 	hashtable(size_type size,
@@ -209,6 +211,7 @@ public:
 		const allocator_type& a = allocator_type())
 		: node_allocator(a), hash(in_hf), equals(in_equal_key), get_key(ExtractKey()), buckets(a), num_element(0)
 	{
+		_M_initialize_buckets(size);
 	}
 
 	hashtable(const hashtable& other)
@@ -219,15 +222,24 @@ public:
 		buckets(other.get_allocator()), 
 		num_element(other.num_element)
 	{
+		_M_copy_from(other);
 	}
 
-	hashtable &operator(const hashtable& other)
+	hashtable &operator=(const hashtable& other)
 	{
-
+		if (&other != this)
+		{
+			clear();
+			hash = other.hash;
+			equals = other.equals;
+			get_key = other.get_key;
+			_M_copy_from(other);
+		}
+		return *this;
 	}
 	~hashtable()
 	{
-
+		clear();
 	}
 
 	size_type size() const { return num_element; }
@@ -312,18 +324,60 @@ public:
 		{
 			if (equals(get_key(cur->val), get_key(obj)))
 			{
+				// hashtable里面已经存在，则直接返回，不能插入
 				return pair<iterator, bool>(iterator(cur, this), false);
 			}
 		}
+
+		// 没有找到，需要新建一个node
+		_Node* tmp_node = _M_new_node(obj);
+		tmp_node->next = first;
+		buckets[n] = tmp_node;
+		++num_element;
+		return pair<iterator, bool>(iterator(tmp_node, this), true);
 	}
 	iterator insert_equal_noresize(const value_type& obj)
 	{
+		// 计算bucket 索引
+		const size_type n = _M_bkt_num(obj);
 
+		_Node* first = buckets[n];
+		for (_Node* cur = first; cur; cur = cur->next)
+		{
+			if (equals(get_key(obj), get_key(cur->val)))
+			{
+				_Node* tmp_node = _M_new_node(obj);
+				tmp_node->next = cur->next;
+				cur->next = tmp_node;
+				++num_element;
+				return iterator(tmp_node, this);
+			}
+		}
+		_Node* tmp_node = _M_new_node(obj);
+		tmp_node->next = first;
+		buckets[n] = tmp_node;
+		++num_element;
+		return iterator(tmp_node, this);
 	}
 
 	reference find_or_insert(const value_type& obj)
 	{
+		resize(num_element + 1);
 
+		size_type n = _M_bkt_num(obj);
+		_Node* first = buckets[n];
+		for (_Node* cur = first; cur; cur = cur->next)
+		{
+			if (equals(get_key(obj), get_key(cur->val)))
+			{
+				return cur->val;  // 找到直接返回
+			}
+		 }
+		_Node* tmp = _M_new_node(obj);
+		tmp->next = buckets[n];
+		buckets[n] = tmp;
+		++num_element;
+		return tmp->val;
 	}
 
 	iterator find(const key_type& key)
@@ -334,6 +388,141 @@ public:
 		{ }
 		return iterator(first, this);
 	}
+
+	size_type count(const key_type& key) const
+	{
+		const size_type n = _M_bkt_num_key(key);
+		size_type result = 0;
+		for (const _Node* cur = buckets[n]; cur; cur = cur->next)
+		{
+			if (equals(key, get_key(cur->val)))
+			{
+				++result;
+			}
+		}
+		return result;
+	}
+
+	
+	pair<iterator, iterator> equal_range(const key_type& key)
+	{
+		return pair<iterator, iterator>();
+	}
+	pair<const_iterator, const_iterator> equal_range(const key_type& key) const
+	{
+		return pair<const_iterator, const_iterator>();
+	}
+
+	size_type erase(const key_type& key)
+	{
+		const size_type n = _M_bkt_num_key(key); 
+		_Node* first = buckets[n];
+
+		size_type erase_count = 0;
+		if (first != nullptr)
+		{
+			_Node* cur = first;
+			_Node* next = cur->next;
+			while (next)
+			{
+				if (equals(get_key(next->val), key))
+				{
+					cur->next = next->next;
+					_M_delete_node(next);
+					next = cur->next;
+					--num_element;
+					++erase_count;
+				}
+				else
+				{
+					cur = next;
+					next = cur->next;
+				}
+			}
+		}
+		if (equals(get_key(first), key))
+		{
+			buckets[n] = first->next;
+			_M_delete_node(first);
+			++erase_count;
+			--num_element;
+		}
+		return erase_count;
+	}
+	void erase(const iterator& iter)
+	{
+		_Node* node = iter.cur_node;
+		if (node)
+		{
+			const size_type n - _M_bkt_num(node->val);
+			_Node* cur = buckets[n];
+			if (cur == node)
+			{
+				buckets[n] = cur->next;
+				_M_delete_node(cur);
+				--num_element;
+			}
+			else
+			{
+				_Node* next = cur->next;
+				while (next)
+				{
+					if (next == node)
+					{
+						cur->next = next->next;
+						_M_delete_node(next);
+						--num_element;
+						break;
+					}
+					else
+					{
+						cur = next;
+						next = cur->next;
+					}
+				}
+			}
+		}
+	}
+	void erase(iterator first, iterator last)
+	{
+		size_type first_bucket = first.cur_node ? _M_bkt_num(first.cur_node->val) : buckets.size();
+		size_type last_bucket = last.cur_node ? _M_bkt_num(last.cur_node->val) : buckets.size();
+		if (first.cur_node == last.cur_node)
+		{
+			return;
+		}
+		else if (first_bucket == last_bucket)
+		{
+			_M_erase_bucket(first_bucket, first.cur_node, last.cur_node);
+		}
+		else
+		{
+			_M_erase_bucket(first_bucket, first.cur_node, nullptr);
+			for (size_type n = first_bucket + 1; n < last_bucket; ++n)
+			{
+				_M_erase_bucket(n, nullptr);
+			}
+			if (last_bucket != buckets.size())
+			{
+				_M_erase_bucket(last_bucket, last.cur_node);
+			}
+		}
+	}
+
+	void erase(const const_iterator& iter)
+	{
+		erase(iterator(const_cast<_Node*>(iter.cur_node), const_cast<hashtable*>(iter.ht));
+	}
+	void erase(const_iterator first, const_iterator last)
+	{
+		erase(iterator(const_cast<_Node*>(first.cur_node),
+			const_cast<hashtable*>(first.ht)),
+			iterator(const_cast<_Node*>(last.cur_node),
+				const_cast<hashtable*>(last.ht)));
+	}
+
+	void resize(size_type num_element_hint);
+	void clear();
 
 private:
 	size_type _M_next_size(size_type n) const
@@ -386,11 +575,63 @@ private:
 		put_node(node);
 	}
 
-	void _M_erase_bucket(const size_type n, _Node* first, _Node* last);
-	void _M_erase_bucket(const size_type n, _Node* last);
+	void _M_erase_bucket(const size_type n, _Node* first, _Node* last)
+	{
+		_Node* cur = buckets[n];
+		if (cur == first)
+		{
+			_M_erase_bucket(n, last);
+		}
+		else
+		{
+			_Node* next = nullptr;
+			for (next = cur->next; next != first; cur = next; next = cur->next);
+			while (next != last)
+			{
+				cur->next = next->next;
+				_M_delete_node(next);
+				next = cur->next;
+				--num_element;
+			}
+		}
+	}
+	void _M_erase_bucket(const size_type n, _Node* last)
+	{
+		_Node* cur = buckets[n];
+		while (cur != last)
+		{
+			_Node* next = cur->next;
+			_M_delete_node(cur);
+			cur = next;
+			buckets[n] = cur;
+			--num_element;
+		}
+	}
 
-	void _M_copy_from(const hashtable& other);
+	void _M_copy_from(const hashtable& other)
+	{
+		buckets.clear();
+		buckets.reserve(other.buckets.size());
+		buckets.insert(buckets.end(), other.buckets.size(), nullptr);
+		for (size_type n = 0; n < other.buckets.size(); ++n)
+		{
+			const _Node* cur = other.buckets[n];
+			if (cur)
+			{
+				_Node* copy_node = _M_new_node(cur->val);
+				buckets[n] = copy_node;
+				for (_Node* next = cur->next; next; cur = next; next = next->next)
+				{
+					copy_node->next = _M_new_node(next->val);
+					copy_node = copy_node->next;
+				}
+			}
+		}
+		num_element = other.num_element;
+	}
 };
+
+
 
 //////////////////////////////////////////////////////////////////////////
 // iterator
@@ -497,11 +738,50 @@ inline void swap(hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>&ht1
 
 //////////////////////////////////////////////////////////////////////////
 // hashtable
-template<class Value, class Key, class HashFun, class ExtractKey, class EqualKey, class Alloc>
-void hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>::_M_copy_from(const hashtable& other)
-{
 
+template<class Value, class Key, class HashFun, class ExtractKey, class EqualKey, class Alloc>
+void hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>::resize(size_type num_element_hint)
+{
+	const size_type old_n = buckets.size();
+
+	if (num_element_hint > old_n)
+	{
+		const size_type new_size = _M_next_size(num_element_hint);
+		if (new_size > old_n)
+		{
+			vector<_Node*, Alloc> tmp_buckets(new_size, nullptr, buckets.get_allocator());
+			for (size_type bucket = 0; bucket < old_n; ++bucket)
+			{
+				_Node* first = buckets[bucket];
+				while (first != nullptr)
+				{
+					// 计算新的散列值
+					size_type new_bucket = _M_bkt_num(first->val, new_size);
+					buckets[bucket] = first->next;
+					first->next = tmp_buckets[new_bucket];
+					tmp_buckets[new_bucket] = first;
+					first = buckets[bucket];
+				}
+			}
+			bucket.swap(tmp_buckets);
+		}
+	}
 }
 
-
+template<class Value, class Key, class HashFun, class ExtractKey, class EqualKey, class Alloc>
+void hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>::clear()
+{
+	for (size_type n = 0; n < buckets.size(); ++n)
+	{
+		_Node* first = buckets[n];
+		while (first != nullptr)
+		{
+			_Node* next = first->next;
+			_M_delete_node(first);
+			first = next;
+		}
+		buckets[n] = nullptr;
+	}
+	num_element = 0;
+}
 __STL_END_NAMESPACE

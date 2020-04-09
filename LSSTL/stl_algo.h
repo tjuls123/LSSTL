@@ -300,4 +300,11 @@ ForwardIterator __lower_bound(ForwardIterator first, ForwardIterator last, const
 		len = half;
 	}
 }
+
+template<class ForwardIterator, class T, class Distance>
+ForwardIterator lower_bound(ForwardIterator first, ForwardIterator last, const T& value)
+{
+	return __lower_bound(first, last, value, __DISTANCE_TYPE(first));
+}
+
 __STL_END_NAMESPACE
