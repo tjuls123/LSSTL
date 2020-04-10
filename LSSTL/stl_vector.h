@@ -145,6 +145,13 @@ public:
 			_M_end_of_storage = _M_start + n;
 		}
 	}
+
+	iterator _M_allocate_and_copy(size_type n, const_iterator firt, const_iterator last)
+	{
+		iterator result = _M_allocate(n);
+		uninitialized_copy(firt, last, result);
+		return result;
+	}
 	void assign(size_type n, const _Tp& val) { _M_fill_assign(n, val); }
 	reference front() { return *begin(); }
 	const_reference front() const { return *cbegin(); }
