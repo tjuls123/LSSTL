@@ -8,6 +8,7 @@
 #include "stl_list.h"
 #include"stl_heap.h"
 #include "stl_initializer_list.h"
+#include "stl_hashtable.h"
 using namespace std;
 
 
@@ -37,10 +38,6 @@ public:
 		cout << "const ff" << endl;
 	}
 
-	void ff(const int a)
-	{
-
-	}
 };
 
 class B : public A

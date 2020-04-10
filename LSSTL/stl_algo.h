@@ -97,19 +97,6 @@ InputIterator find_if_not(InputIterator first, InputIterator last, UnaryPredicat
 }
 
 
-template<class InputIterator, class UnaryPredicate>
-InputIterator find_if_not(InputIterator first, InputIterator last, UnaryPredicate Pred)
-{
-	for (; first != last; ++first)
-	{
-		if (!Pred(*first))
-		{
-			return first;
-		}
-	}
-	return last;
-}
-
 template<class InputIterator, class ForwardIterator>
 InputIterator find_first_of(InputIterator first1, InputIterator last1, ForwardIterator first2, ForwardIterator last2)
 {
@@ -292,16 +279,17 @@ ForwardIterator __lower_bound(ForwardIterator first, ForwardIterator last, const
 		{
 			first = middle;
 		}
+		else
+		{
+			len = half;
+		}
 		++first;
 		len = len - half - 1;
 	}
-	else
-	{
-		len = half;
-	}
+	
 }
 
-template<class ForwardIterator, class T, class Distance>
+template<class ForwardIterator, class T>
 ForwardIterator lower_bound(ForwardIterator first, ForwardIterator last, const T& value)
 {
 	return __lower_bound(first, last, value, __DISTANCE_TYPE(first));
