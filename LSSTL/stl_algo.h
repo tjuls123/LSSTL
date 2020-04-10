@@ -267,7 +267,7 @@ template<class ForwardIterator, class T, class Distance>
 ForwardIterator __lower_bound(ForwardIterator first, ForwardIterator last, const T& value, Distance*, forward_iterator_tag)
 {
 	Distance len = 0;
-	distance(first, last, len);
+	len = distance(first, last);
 	Distance half;
 	ForwardIterator middle;
 	while (len > 0)
@@ -292,7 +292,7 @@ ForwardIterator __lower_bound(ForwardIterator first, ForwardIterator last, const
 template<class ForwardIterator, class T>
 ForwardIterator lower_bound(ForwardIterator first, ForwardIterator last, const T& value)
 {
-	return __lower_bound(first, last, value, __DISTANCE_TYPE(first));
+	return __lower_bound(first, last, value, __DISTANCE_TYPE(first), forward_iterator_tag());
 }
 
 __STL_END_NAMESPACE

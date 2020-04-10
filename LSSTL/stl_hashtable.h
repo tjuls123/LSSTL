@@ -168,13 +168,15 @@ public:
 	hasher hash_funct() const { return hash; }
 	key_equal key_eq() const { return equals; }
 
+protected:
+	using _Node = hashtable_node<Value>;
 public:
-	using allocator_type = typename allocator_traits<Alloc>::allocator_type;
+	using allocator_type = typename allocator<_Node>;
 	allocator_type get_allocator() const {
 		return node_allocator;
 	}
 private:
-	typename allocator_traits<Alloc>::allocator_type node_allocator;
+	allocator_type node_allocator;
 	_Node* get_node() { return node_allocator.allocate(1); }
 	void put_node(_Node* p) { node_allocator.deallocate(p, 1); }
 
@@ -243,7 +245,7 @@ public:
 	}
 
 	size_type size() const { return num_element; }
-	size_type max_size() cosnt { return size_type(-1); }
+	size_type max_size() const { return size_type(-1); }
 	bool empty() const { return size() == 0; }
 	
 	void swap(const hashtable& other)
@@ -454,7 +456,7 @@ public:
 		_Node* node = iter.cur_node;
 		if (node)
 		{
-			const size_type n - _M_bkt_num(node->val);
+			const size_type n = _M_bkt_num(node->val);
 			_Node* cur = buckets[n];
 			if (cur == node)
 			{
@@ -511,7 +513,7 @@ public:
 
 	void erase(const const_iterator& iter)
 	{
-		erase(iterator(const_cast<_Node*>(iter.cur_node), const_cast<hashtable*>(iter.ht));
+		//erase(iterator(const_cast<_Node*>(iter.cur_node), const_cast<hashtable*>(iter.ht));
 	}
 	void erase(const_iterator first, const_iterator last)
 	{
@@ -585,7 +587,7 @@ private:
 		else
 		{
 			_Node* next = nullptr;
-			for (next = cur->next; next != first; cur = next; next = cur->next);
+			for (next = cur->next; next != first; cur = next, next = cur->next)
 			while (next != last)
 			{
 				cur->next = next->next;
@@ -620,7 +622,7 @@ private:
 			{
 				_Node* copy_node = _M_new_node(cur->val);
 				buckets[n] = copy_node;
-				for (_Node* next = cur->next; next; cur = next; next = next->next)
+				for (_Node* next = cur->next; next; cur = next, next = next->next)
 				{
 					copy_node->next = _M_new_node(next->val);
 					copy_node = copy_node->next;
@@ -701,7 +703,7 @@ bool operator==(
 	const hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>&ht1,
 	const hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>& ht2)
 {
-	using _Node = hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>::_Node;
+	using _Node = typename hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>::_Node;
 	if (ht1.buckets.size() != ht2.buckets.size())
 	{
 		return false;
@@ -763,7 +765,7 @@ void hashtable<Value, Key, HashFun, ExtractKey, EqualKey, Alloc>::resize(size_ty
 					first = buckets[bucket];
 				}
 			}
-			bucket.swap(tmp_buckets);
+			buckets.swap(tmp_buckets);
 		}
 	}
 }

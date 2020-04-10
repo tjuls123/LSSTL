@@ -50,10 +50,5 @@ private:
 };
 int main()
 {
-	A *pa = new A();
-	pa->ff(2);
-
-	int a = reinterpret_cast<int>(pa);
-	cout << a << endl;
 	system("pause");
 }
