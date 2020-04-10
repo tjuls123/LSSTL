@@ -148,7 +148,7 @@ bool operator==(
 
 
 
-template<class Value, class Key, class HashFun, class ExtractKey, class EqualKey, class Alloc>
+template<class Value, class Key, class HashFun, class ExtractKey, class EqualKey, class Alloc=allocator<hashtable_node<Value>>>
 class hashtable
 {
 public:

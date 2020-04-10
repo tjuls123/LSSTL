@@ -7,8 +7,10 @@
 #include <algorithm>
 #include "stl_list.h"
 #include"stl_heap.h"
+#include "stl_alloc.h"
 #include "stl_initializer_list.h"
 #include "stl_hashtable.h"
+#include "stl_function.h"
 using namespace std;
 
 
@@ -48,7 +50,14 @@ private:
 		cout << "B:func" << endl;
 	}
 };
+
+
+int hasher(int v)
+{
+
+}
 int main()
 {
+	lsstd::hashtable<int, int, lsstd::hash<int>, lsstd::identity<int>, lsstd::equal_to<int>> ht;
 	system("pause");
 }

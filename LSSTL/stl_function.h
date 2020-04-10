@@ -68,14 +68,6 @@ struct modulus : public binary_function<T, T, T>
 	}
 };
 
-template<class T>
-struct modulus : public unary_function<T, T>
-{
-	T operator()(const T& x)
-	{
-		return -x;
-	}
-};
 
 //////////////////////////////////////////////////////////////////////////
 // ±È½Ï
@@ -167,4 +159,25 @@ struct logic_not : public unary_function<T, bool>
 		return !x;
 	}
 };
+
+
+template<class T>
+struct hash : public unary_function<T, T>
+{
+	T operator()(const T& x)
+	{
+		return x;
+	}
+};
+
+
+template<class T>
+struct identity : public unary_function<T, T>
+{
+	T operator()(const T& x)
+	{
+		return x;
+	}
+};
+
 __STL_END_NAMESPACE
