@@ -58,6 +58,6 @@ int hasher(int v)
 }
 int main()
 {
-	lsstd::hashtable<int, int, lsstd::hash<int>, lsstd::identity<int>, lsstd::equal_to<int>> ht;
+	lsstd::hashtable<int, int, lsstd::hash<int>, lsstd::identity<int>, lsstd::equal_to<int>> ht(50, lsstd::hash<int>(), lsstd::equal_to<int>());
 	system("pause");
 }
