@@ -164,7 +164,7 @@ struct logic_not : public unary_function<T, bool>
 template<class T>
 struct hash : public unary_function<T, T>
 {
-	T operator()(const T& x)
+	const T &operator()(const T& x) const 
 	{
 		return x;
 	}
@@ -174,7 +174,7 @@ struct hash : public unary_function<T, T>
 template<class T>
 struct identity : public unary_function<T, T>
 {
-	T operator()(const T& x)
+	const T& operator()(const T& x) const
 	{
 		return x;
 	}

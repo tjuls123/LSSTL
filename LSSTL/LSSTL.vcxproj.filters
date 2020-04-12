@@ -71,5 +71,14 @@
     <ClInclude Include="stl_pair.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="stl_rb_tree.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stl_avl_tree.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stl_graph.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

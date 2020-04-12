@@ -186,7 +186,7 @@ private:
 	hasher hash;
 	key_equal equals;
 	ExtractKey get_key;
-	vector<_Node*, Alloc> buckets;
+	vector<_Node*> buckets;
 	size_type num_element;
 
 public:
@@ -289,6 +289,22 @@ public:
 	}
 
 public:
+
+	template<class Print>
+	void print(Print p)
+	{
+		for (size_type n = 0; n < buckets.size(); ++n)
+		{
+			_Node* first = buckets[n];
+			lsstd::vector<value_type> vec;
+			while (first)
+			{
+				vec.push_back(first->val);
+				first = first->next;
+			}
+			p(n, vec);
+		}
+	}
 	size_type bucket_count() const { return buckets.size(); }
 
 	size_type max_bucket_count() const { return __stl_prime_list[__stl_num_primes - 1]; }
@@ -303,7 +319,7 @@ public:
 		}
 		return n;
 	}
-
+	
 	pair<iterator, bool> insert_unique(const value_type& obj)
 	{
 		resize(num_element + 1);
@@ -313,21 +329,31 @@ public:
 	iterator insert_equal(const value_type& obj)
 	{
 		resize(num_element + 1);
-		return insert_unique_noresize(obj);
+		return insert_equal_noresize(obj);
 	}
-
+	
 	pair<iterator, bool> insert_unique_noresize(const value_type& obj)
 	{
 		// 计算bucket 索引
 		const size_type n = _M_bkt_num(obj);
-
+		iterator iter;
 		_Node* first = buckets[n];
 		for (_Node* cur = first; cur; cur = cur->next)
 		{
 			if (equals(get_key(cur->val), get_key(obj)))
 			{
 				// hashtable里面已经存在，则直接返回，不能插入
-				return pair<iterator, bool>(iterator(cur, this), false);
+
+				iter.cur_node = cur;
+				iter.ht = this;
+
+				pair<iterator, bool> p;
+				p.first = iter;
+				p.second = false;
+
+				return p;
+
+				//return pair<iterator, bool>(iterator(cur, this), false);
 			}
 		}
 
@@ -336,13 +362,23 @@ public:
 		tmp_node->next = first;
 		buckets[n] = tmp_node;
 		++num_element;
-		return pair<iterator, bool>(iterator(tmp_node, this), true);
+
+		iter.cur_node = tmp_node;
+		iter.ht = this;
+
+		pair<iterator, bool> p;
+		p.first = iter;
+		p.second = true;
+		
+		return p;
+
+		//return pair<iterator, bool>(iterator(tmp_node, this), true);
 	}
 	iterator insert_equal_noresize(const value_type& obj)
 	{
 		// 计算bucket 索引
 		const size_type n = _M_bkt_num(obj);
-
+		iterator iter;
 		_Node* first = buckets[n];
 		for (_Node* cur = first; cur; cur = cur->next)
 		{
@@ -352,14 +388,20 @@ public:
 				tmp_node->next = cur->next;
 				cur->next = tmp_node;
 				++num_element;
-				return iterator(tmp_node, this);
+				iter.cur_node = tmp_node;
+				iter.ht = this;
+				return iter;
+				//return iterator(tmp_node, this);
 			}
 		}
 		_Node* tmp_node = _M_new_node(obj);
 		tmp_node->next = first;
 		buckets[n] = tmp_node;
 		++num_element;
-		return iterator(tmp_node, this);
+		iter.cur_node = tmp_node;
+		iter.ht = this;
+		return iter;
+		//return iterator(tmp_node, this);
 	}
 
 	reference find_or_insert(const value_type& obj)
@@ -513,7 +555,7 @@ public:
 
 	void erase(const const_iterator& iter)
 	{
-		//erase(iterator(const_cast<_Node*>(iter.cur_node), const_cast<hashtable*>(iter.ht));
+		erase(iterator(const_cast<_Node*>(iter.cur_node), const_cast<hashtable*>(iter.ht)));
 	}
 	void erase(const_iterator first, const_iterator last)
 	{
@@ -563,7 +605,7 @@ private:
 		return _M_bkt_num_key(get_key(obj), n);
 	}
 
-	_Node* _M_new_node(const value_type& obj, size_type n) const
+	_Node* _M_new_node(const value_type& obj)
 	{
 		_Node* node = get_node();
 		node->next = nullptr;

@@ -89,5 +89,37 @@ inline void uninitialized_fill(ForwardIterator first, ForwardIterator last, cons
 	__uninitialized_fill(first, last, __VALUE_TYPE(first));
 }
 
+template<class ForwardIterator, class Size, class T>
+inline ForwardIterator __uninitialized_fill_n_aux(ForwardIterator first, Size n, const T& x, true_type)
+{
+	return fill_n(first, n, x);
+}
+
+template<class ForwardIterator, class Size, class T>
+inline ForwardIterator __uninitialized_fill_n_aux(ForwardIterator first, Size n, const T& x, false_type)
+{
+	ForwardIterator cur = first;
+	for (; n > 0; --n, ++cur)
+	{
+		construct(&*cur, x);
+	}
+	return cur;
+}
+
+
+template<class ForwardIterator, class Size, class T1, class T2>
+inline ForwardIterator __uninitialized_fill_n(ForwardIterator first, Size n, const T1& x, T2*)
+{
+	using Is_POD = typename type_traits<T2>::is_POD_type;
+	return __uninitialized_fill_n_aux(first, n, x, Is_POD());
+}
+
+
+template<class ForwardIterator, class Size, class T>
+inline ForwardIterator uninitialized_fill_n(ForwardIterator first, Size n, const T& x)
+{
+	return __uninitialized_fill_n(first, n, x, __VALUE_TYPE(first));
+}
+
 __STL_END_NAMESPACE
 #endif 

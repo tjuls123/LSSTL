@@ -286,7 +286,7 @@ ForwardIterator __lower_bound(ForwardIterator first, ForwardIterator last, const
 		++first;
 		len = len - half - 1;
 	}
-	
+	return first;
 }
 
 template<class ForwardIterator, class T>
